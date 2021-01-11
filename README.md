@@ -1,1 +1,1 @@
-# microservices-e-commerce-demo
+# e-commerce-microservices-demo
