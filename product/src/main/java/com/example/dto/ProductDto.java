@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Product {
+public class ProductDto {
 
 	protected Integer id;
 	protected String name;
-	protected Category category;
+	protected CategoryDto category;
 	protected double price;
 	protected double discount;
 	protected String discountDescription;

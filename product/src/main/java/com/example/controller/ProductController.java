@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.dto.Product;
+import com.example.dto.ProductDto;
 import com.example.service.ProductService;
 
 import lombok.AllArgsConstructor;
@@ -30,46 +30,52 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping(path ="/add",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<Product> addProduct(@RequestBody Product product) {
+	public @ResponseBody ResponseEntity<ProductDto> addProduct(@RequestBody ProductDto product) {
 		log.info("product object from request \t"+product);
 		productService.addProduct(product);
 		return new ResponseEntity<>(product,HttpStatus.CREATED);
 	}
 
 	@GetMapping(path="/list",produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<List<Product>> getProductList(){
-		List<Product> products=productService.getProductList();
-		return new ResponseEntity<List<Product>>(products,HttpStatus.OK);
+	public @ResponseBody ResponseEntity<List<ProductDto>> getProductList(){
+		List<ProductDto> products=productService.getProductList();
+		return new ResponseEntity<List<ProductDto>>(products,HttpStatus.OK);
 	}
 
 	@GetMapping(path="/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<Product>  getProduct(@PathVariable(name = "id",required = true)  String id) {
+	public @ResponseBody ResponseEntity<ProductDto>  getProduct(@PathVariable(name = "id",required = true)  String id) {
 		log.info("product id from request\t"+id);
 		Integer productId=Integer.parseInt(id);
-		Product product=productService.getProduct(productId);
-		return new ResponseEntity<>(product,HttpStatus.OK);
+		ProductDto product;
+		try {
+			product = productService.getProduct(productId);
+			return new ResponseEntity<>(product,HttpStatus.OK);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(new ProductDto(),HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@GetMapping(path="category/{categoryName}",produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<List<Product>> getCategoryName(@PathVariable(name="categoryName",required = true)String categoryName){
+	public @ResponseBody ResponseEntity<List<ProductDto>> getCategoryName(@PathVariable(name="categoryName",required = true)String categoryName){
 		log.info("product category name from request\t"+categoryName);
-		List<Product> products= productService.getCategoryName(categoryName);
+		List<ProductDto> products= productService.getCategoryName(categoryName);
 		return new ResponseEntity<>(products,HttpStatus.OK);
 	}
 
 
 
 	@GetMapping(path="/brand/{brandName}",produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<List<Product>> getBrand(@PathVariable(name="brandName",required = true) String brandName){
+	public @ResponseBody ResponseEntity<List<ProductDto>> getBrand(@PathVariable(name="brandName",required = true) String brandName){
 		log.info("product brand name from request\t"+brandName);
-		List<Product> products= productService.getBrand(brandName);
+		List<ProductDto> products= productService.getBrand(brandName);
 		return new ResponseEntity<>(products,HttpStatus.OK);
 	}
 
 	@PutMapping(path="/update",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<Product> updateProduct(@RequestBody Product product) {
+	public @ResponseBody ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto product) {
 		log.info("product object from request\t"+product);
-		Product products= productService.updateProduct(product);
+		ProductDto products= productService.updateProduct(product);
 		return new ResponseEntity<>(products,HttpStatus.CREATED);
 	}
 

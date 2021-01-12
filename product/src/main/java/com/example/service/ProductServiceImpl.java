@@ -1,66 +1,84 @@
 package com.example.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import com.example.dto.Product;
+import com.example.document.Product;
+import com.example.dto.ProductDto;
+import com.example.repository.ProductRepository;
+
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class ProductServiceImpl implements ProductService{
 
-	List<Product> products=null;
+	private ProductRepository productRepository;
 
-	public ProductServiceImpl() {
-		products=new ArrayList<>();
+	private ModelMapper modelMapper;
+
+	@Override
+	public ProductDto addProduct(ProductDto productDto) {
+		Product p=modelMapper.map(productDto, Product.class);
+		Product product=productRepository.save(p);
+		ProductDto pDto=modelMapper.map(product, ProductDto.class);
+		return pDto;
 	}
 
 	@Override
-	public Product addProduct(Product product) {
-		products.add(product);
-		return product;
+	public List<ProductDto> getProductList() {
+		List<Product> products=productRepository.findAll();
+		List<ProductDto> productDtos=products.stream().map(product -> modelMapper.map(product, ProductDto.class)).collect(Collectors.toList());
+		return productDtos;
 	}
 
 	@Override
-	public List<Product> getProductList() {
+	public ProductDto getProduct(Integer id) throws IllegalAccessException {
+		Product product=productRepository.findById(id).orElseThrow(() -> new IllegalAccessException());
+		ProductDto productDto=modelMapper.map(product, ProductDto.class);
+		return productDto;
+	}
 
-		return products.stream().collect(Collectors.toList());
+	@Override
+	public List<ProductDto> getCategoryName(String categoryName) {
+		List<Product> products=productRepository.findByCategory(categoryName);
+		List<ProductDto> productDtos=products.stream().map(product -> modelMapper.map(product, ProductDto.class)).collect(Collectors.toList());
+		return productDtos;
 
 	}
 
 	@Override
-	public Product getProduct(Integer id) {
-		return products.stream().filter(product -> product.getId()==id).findAny().get();
+	public List<ProductDto> getBrand(String brandName) {
+		List<Product> products=productRepository.findByBrand(brandName);
+		List<ProductDto> productDtos=products.stream().map(product -> modelMapper.map(product, ProductDto.class)).collect(Collectors.toList());
+		return productDtos;
 	}
 
 	@Override
-	public List<Product> getCategoryName(String categoryName) {
-		return	products.stream().filter(products -> products.getCategory().getName().equals(categoryName)).collect(Collectors.toList());
-	}
+	public ProductDto updateProduct(ProductDto productDto) {
 
-	@Override
-	public List<Product> getBrand(String brandName) {
-		return	products.stream().filter(products -> products.getCategory().getBrand().equals(brandName)).collect(Collectors.toList());
-	}
-
-
-	@Override
-	public Product updateProduct(Product product) {
-
-		 products.add(product);
-		 return product;
+		Product p=productRepository.findById(productDto.getId()).get();
+		if(p!=null) {
+			p=modelMapper.map(productDto, Product.class);
+			Product product=productRepository.save(p);
+			ProductDto pDto=modelMapper.map(product, ProductDto.class);
+			return pDto;
+		}else {
+			return new ProductDto();
+		}
 	}
 
 	@Override
 	public String deleteProduct(Integer id) {
-     for(Product product:products) {
-    	 if(product.getId()==id) {
-    		 products.remove(product);
-    	 }
-     }
-      return "product deleted";
+
+		productRepository.deleteById(id);
+		return "product deleted successfully";
 	}
+
+
+
 
 }

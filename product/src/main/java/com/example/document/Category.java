@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Category {
+	
 	protected Integer id;
 	protected String name;
 	protected String brand;
