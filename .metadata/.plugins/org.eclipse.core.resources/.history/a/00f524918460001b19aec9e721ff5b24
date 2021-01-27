@@ -33,13 +33,4 @@ logging:  file:    name: e:/logs/product.log
 # actuator config   
 
 management:  endpoints:    web:      exposure:        include:        - '*'
-  endpoint:    health:      show-details: always
-     # to disable mongo status
-  health:
-    mongo:      enabled:  false 
-      
-info:
-  app:
-    name: Product Microservice
-    version: 1.0
-    desccription: Add and retrieve product information     
+  endpoint:    health:      show-details: always     

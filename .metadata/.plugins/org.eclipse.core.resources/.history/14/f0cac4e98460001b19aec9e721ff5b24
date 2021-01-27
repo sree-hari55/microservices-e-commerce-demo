@@ -34,9 +34,6 @@ logging:  file:    name: e:/logs/product.log
 
 management:  endpoints:    web:      exposure:        include:        - '*'
   endpoint:    health:      show-details: always
-     # to disable mongo status
-  health:
-    mongo:      enabled:  false 
       
 info:
   app:
