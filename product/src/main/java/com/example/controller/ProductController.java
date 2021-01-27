@@ -2,6 +2,8 @@ package com.example.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.ProductDto;
 import com.example.service.ProductService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +32,13 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductController {
 
 	private ProductService productService;
+	private ObjectMapper objectMapper;
 
 	@PostMapping(path ="/add",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<ProductDto> addProduct(@RequestBody ProductDto product) {
-		log.info("product object from request \t"+product);
-		productService.addProduct(product);
-		return new ResponseEntity<>(product,HttpStatus.CREATED);
+	public @ResponseBody ResponseEntity<ProductDto> addProduct(@RequestBody @Valid ProductDto product) throws JsonProcessingException {
+		log.info("product object from request :{}",objectMapper.writeValueAsString(product));
+		ProductDto productDto=productService.addProduct(product);
+		return new ResponseEntity<>(productDto,HttpStatus.CREATED);
 	}
 
 	@GetMapping(path="/list",produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,10 +78,10 @@ public class ProductController {
 	}
 
 	@PutMapping(path="/update",consumes = MediaType.APPLICATION_JSON_VALUE,produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto product) {
-		log.info("product object from request\t"+product);
-		ProductDto products= productService.updateProduct(product);
-		return new ResponseEntity<>(products,HttpStatus.CREATED);
+	public @ResponseBody ResponseEntity<ProductDto> updateProduct(@RequestBody @Valid ProductDto productDto) {
+		log.info("product object from request\t"+productDto);
+		ProductDto product= productService.updateProduct(productDto);
+		return new ResponseEntity<>(product,HttpStatus.CREATED);
 	}
 
 	@DeleteMapping(path="/delete/{id}",produces = MediaType.TEXT_PLAIN_VALUE)

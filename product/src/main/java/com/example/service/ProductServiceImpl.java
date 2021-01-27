@@ -8,23 +8,44 @@ import org.springframework.stereotype.Service;
 
 import com.example.document.Product;
 import com.example.dto.ProductDto;
+import com.example.exception.CurrencyNotValidException;
+import com.example.exception.OfferNotValidException;
 import com.example.repository.ProductRepository;
+import com.example.service.config.CurrencyConfig;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService{
 
+	private final String SEQUENCE_NAME="product_sequence";
 	private ProductRepository productRepository;
+	private CurrencyConfig currencyConfig;
 
 	private ModelMapper modelMapper;
+	private ProductSequenceGeneratorService productSequenceGeneratorService;
 
 	@Override
 	public ProductDto addProduct(ProductDto productDto) {
+		log.info("productdto\t"+productDto);
+		ProductDto pDto=null;
+		if(productDto.getPrice()==0 && productDto.getDiscount()>0) {
+			log.info("inside if block product pice is 0");
+			throw new OfferNotValidException("No discount is allowed for 0 price");
+		}
+		// validating currencies
+		if(!currencyConfig.getCurrencies().contains(productDto.getCurrency().toUpperCase())) {
+			throw new CurrencyNotValidException("Invalid currency, available  currencies:"+currencyConfig.getCurrencies());
+		}
 		Product p=modelMapper.map(productDto, Product.class);
+		int sequncesId=productSequenceGeneratorService.generateSequenceNo(SEQUENCE_NAME);
+		log.info("sequncesId:{}"+sequncesId);
+		p.setId(sequncesId);
 		Product product=productRepository.save(p);
-		ProductDto pDto=modelMapper.map(product, ProductDto.class);
+		pDto=modelMapper.map(product, ProductDto.class);
 		return pDto;
 	}
 

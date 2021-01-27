@@ -1,0 +1,30 @@
+package com.example.filter.utils;
+
+import java.io.IOException;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import org.apache.commons.io.IOUtils;
+
+public class CustomHttpRequestWrapper extends HttpServletRequestWrapper{
+
+	byte[] requestBody;
+	public CustomHttpRequestWrapper(HttpServletRequest request) {
+		super(request);
+		try {
+			requestBody=IOUtils.toByteArray(request.getInputStream());
+		} catch (IOException e) {
+			throw new RuntimeException("Issue while reading request stream");
+		}
+	}
+
+	@Override
+	public ServletInputStream getInputStream() throws IOException {
+	}
+
+	public byte[] getRequestBody() {
+		return requestBody;
+	}
+}

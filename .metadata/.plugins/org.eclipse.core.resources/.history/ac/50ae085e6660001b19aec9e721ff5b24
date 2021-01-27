@@ -1,0 +1,39 @@
+package com.example.filter;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Component;
+
+import com.example.filter.utils.CustomHttpRequestWrapper;
+import com.example.filter.utils.CustomHttpResponseWrapper;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
+public class RequestResponseLoggers implements Filter{
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+
+		CustomHttpRequestWrapper customHttpRequestWrapper=new CustomHttpRequestWrapper( (HttpServletRequest) request);
+		log.info("Http URI: {}",customHttpRequestWrapper.getRequestURI());
+		log.info("Http Method: {}",customHttpRequestWrapper.getMethod());
+		log.info("Http Request Body: {}",new String(customHttpRequestWrapper.getRequestBody()).replace("\n"," "));
+
+		CustomHttpResponseWrapper customHttpResponseWrapper=new CustomHttpResponseWrapper((HttpServletResponse) response);
+		log.info("Http status code:{}",customHttpResponseWrapper.getStatus());
+		log.info("Http Response Body:{}",customHttpResponseWrapper.getBaos());
+		chain.doFilter(customHttpRequestWrapper, customHttpResponseWrapper);
+
+	}
+}

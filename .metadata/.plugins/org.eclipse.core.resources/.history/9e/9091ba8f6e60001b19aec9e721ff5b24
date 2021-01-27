@@ -1,0 +1,31 @@
+server:
+  port: 4444
+  
+
+spring:
+  application:
+    name: product-service
+#  profiles:#    active: dev,test,stage,prod
+  data:
+    mongodb:
+      database: products
+      host: 192.168.99.100
+      port: 27017
+      
+      
+#To Manage configuration at run time we can use spring.config.additional-location property
+
+# java -jar product-0.0.1-SNAPSHOT.jar --spring.config.additional-location=C:\Users\srihari.g\Desktop\product-currencies.yml
+
+# custom properties
+product:
+  currencies:
+  - INR
+  - USD
+  - EUR
+  
+  
+# log config
+logging:  file:    name: e:/logs/product.log
+  level: 
+    root: INFO,ERROR,TRACE      

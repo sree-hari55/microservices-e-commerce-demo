@@ -1,0 +1,104 @@
+package com.example.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import com.example.document.Product;
+import com.example.dto.ProductDto;
+import com.example.exception.CurrencyNotValidException;
+import com.example.exception.OfferNotValidException;
+import com.example.repository.ProductRepository;
+import com.example.service.config.CurrencyConfig;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@AllArgsConstructor
+@Slf4j
+public class ProductServiceImpl implements ProductService{
+
+	private final String SEQUENCE_NAME="product_sequence";
+	private ProductRepository productRepository;
+	private CurrencyConfig currencyConfig;
+
+	private ModelMapper modelMapper;
+	private ProductSequenceGeneratorService productSequenceGeneratorService;
+
+	@Override
+	public ProductDto addProduct(ProductDto productDto) {
+		log.info("productdto\t"+productDto);
+		ProductDto pDto=null;
+		if(productDto.getPrice()==0 && productDto.getDiscount()>0) {
+			log.info("inside if block product pice is 0");
+			throw new OfferNotValidException("No discount is allowed for 0 price");
+		}
+		// validating currencies
+		if(!currencyConfig.getCurrencies().contains(productDto.getCurrency().toUpperCase())) {
+			throw new CurrencyNotValidException("Invalid currency, available  currencies:"+currencyConfig.getCurrencies());
+		}
+		Product p=modelMapper.map(productDto, Product.class);
+		int sequncesId=productSequenceGeneratorService.generateSequenceNo(SEQUENCE_NAME);
+		p.setId(sequncesId);
+		Product product=productRepository.save(p);
+		pDto=modelMapper.map(product, ProductDto.class);
+		return pDto;
+	}
+
+	@Override
+	public List<ProductDto> getProductList() {
+		List<Product> products=productRepository.findAll();
+		List<ProductDto> productDtos=products.stream().map(product -> modelMapper.map(product, ProductDto.class)).collect(Collectors.toList());
+		return productDtos;
+	}
+
+	@Override
+	public ProductDto getProduct(Integer id) throws IllegalAccessException {
+		Product product=productRepository.findById(id).orElseThrow(() -> new IllegalAccessException());
+		ProductDto productDto=modelMapper.map(product, ProductDto.class);
+		return productDto;
+	}
+
+	@Override
+	public List<ProductDto> getCategoryName(String categoryName) {
+		List<Product> products=productRepository.findByCategory(categoryName);
+		List<ProductDto> productDtos=products.stream().map(product -> modelMapper.map(product, ProductDto.class)).collect(Collectors.toList());
+		return productDtos;
+
+	}
+
+	@Override
+	public List<ProductDto> getBrand(String brandName) {
+		List<Product> products=productRepository.findByBrand(brandName);
+		List<ProductDto> productDtos=products.stream().map(product -> modelMapper.map(product, ProductDto.class)).collect(Collectors.toList());
+		return productDtos;
+	}
+
+	@Override
+	public ProductDto updateProduct(ProductDto productDto) {
+
+		Product p=productRepository.findById(productDto.getId()).get();
+		if(p!=null) {
+			p=modelMapper.map(productDto, Product.class);
+			Product product=productRepository.save(p);
+			ProductDto pDto=modelMapper.map(product, ProductDto.class);
+			return pDto;
+		}else {
+			return new ProductDto();
+		}
+	}
+
+	@Override
+	public String deleteProduct(Integer id) {
+
+		productRepository.deleteById(id);
+		return "product deleted successfully";
+	}
+
+
+
+
+}

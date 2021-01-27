@@ -1,0 +1,66 @@
+package com.example.filter;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.example.dto.ProductDto;
+import com.example.filter.utils.CustomHttpRequestWrapper;
+import com.example.filter.utils.CustomHttpResponseWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
+public class RequestResponseLoggers implements Filter{
+
+	@Autowired
+	private ObjectMapper objectMapper;
+	
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+
+		CustomHttpRequestWrapper customHttpRequestWrapper=new CustomHttpRequestWrapper( (HttpServletRequest) request);
+		log.info("Http URI: {}",customHttpRequestWrapper.getRequestURI());
+		String uri=customHttpRequestWrapper.getMethod();
+		log.info("Http Method: {}",uri);
+		String requestBody=new String(customHttpRequestWrapper.getRequestBody()).replace("/n","");
+		
+		// validating request
+		if("/api/v1/product/add".equalsIgnoreCase(uri) || "/api/v1/product/update".equalsIgnoreCase(uri)) {
+			log.info("inside validation");
+			// masking the confidential data
+			ProductDto productDto=objectMapper.readValue(requestBody, ProductDto.class);
+			productDto.setCurrency("******************************");
+			requestBody=objectMapper.writeValueAsString(productDto);
+		}
+
+		log.info("Http Request Body: {}",requestBody);
+		
+		CustomHttpResponseWrapper customHttpResponseWrapper=new CustomHttpResponseWrapper((HttpServletResponse) response);
+		chain.doFilter(customHttpRequestWrapper, customHttpResponseWrapper);
+		log.info("Http status code:{}",customHttpResponseWrapper.getStatus());
+		String responseBody=new String(customHttpResponseWrapper.getBaos().toByteArray());
+		
+		// validating response
+		if("/api/v1/product/add".equalsIgnoreCase(uri) || "/api/v1/product/update".equalsIgnoreCase(uri)) {
+			// masking the confidential data
+			ProductDto productDto=objectMapper.readValue(responseBody, ProductDto.class);
+			productDto.setCurrency("******************************");
+			responseBody=objectMapper.writeValueAsString(productDto);
+		}
+		log.info("Http Response Body:{}",responseBody);
+		
+	}
+}

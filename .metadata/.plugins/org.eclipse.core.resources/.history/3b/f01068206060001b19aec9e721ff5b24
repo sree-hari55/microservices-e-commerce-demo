@@ -1,0 +1,32 @@
+package com.example.filter;
+
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
+public class RequestResponseLoggers implements Filter{
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+		
+		HttpServletRequest httpServletRequest=(HttpServletRequest) request;
+		log.info("Http URI: {}",httpServletRequest.getRequestURI());
+		log.info("Http Method: {}",httpServletRequest.getMethod());
+		byte[] requestBody=IOUtils.toByteArray(httpServletRequest.getInputStream());
+		log.info("Http Body: {}",IOUtils.toString(httpServletRequest.getInputStream()));
+		chain.doFilter(httpServletRequest, response);
+	}
+}

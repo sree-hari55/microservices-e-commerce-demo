@@ -17,8 +17,8 @@ import lombok.NoArgsConstructor;
 public class Product {
 
 	@Id
-	@Field(name="product_id")
-	protected Integer id;
+	@Field(name="_id")
+	protected int id;
 	
 	@Field(name="name")
 	protected String name;
@@ -28,6 +28,9 @@ public class Product {
 	
 	@Field(name="price")
 	protected double price;
+	
+	@Field(name="currency")
+	protected String currency;
 	
 	@Field(name="discount")
 	protected double discount;
