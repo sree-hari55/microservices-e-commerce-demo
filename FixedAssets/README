@@ -1,0 +1,6 @@
+actuator end points
+-------------------
+
+http://localhost:1010/actuator/
+http://localhost:1010/actuator/info
+http://localhost:1010/actuator/health
